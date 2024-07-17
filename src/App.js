@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import './index.css';
+import SectionOne from './scenes/SectionOne';
+import SectionTwo from './scenes/SectionTwo';
+import Pokemon from './scenes/Pokemon';
+import {Container} from '@mui/material';
+import { Routes, Route } from "react-router-dom";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	return (
+		<div className="app">
+			<Container maxWidth='lg' style={{ background: '' }}>
+				<Navbar />
+			<Routes>
+					<Route path='/' element={<><SectionOne /><SectionTwo /></>}/>
+					<Route path='/pokemon/:name' element={<Pokemon />}/>
+			</Routes>
+				<Footer />
+			</Container>
+		</div>
+	);
 }
 
 export default App;
