@@ -91,8 +91,14 @@ const SectionTwo = () => {
 				) : (
 					paginatedPokemonDetails.map((pokemon, index) => (
 						<Grid item xs={12} sm={6} md={3} key={index}>
+				
 							<Card sx={{ maxWidth: '100%' }}>
-								<Box className='flex justify-center items-center' sx={{ background: 'linear-gradient(to right, #283048, #859398); ' }}>
+								<Box Box className = 'flex justify-center items-center'
+								sx = {
+									{
+										background:'linear-gradient(to right, #434343 0%, black 100%);'
+									}
+								} >
 									<Tooltip title={pokemon.name}>
 										<CardMedia
 											component="img"
@@ -103,28 +109,31 @@ const SectionTwo = () => {
 										/>
 									</Tooltip>
 								</Box>
-								<Box sx={{ background: 'linear-gradient(to right, #ece9e6, #ffffff); ' }} className='border-1 border-black'>
-									<CardContent sx={{ padding: '16px 16px 16px 12px !important', height: '100%', marginBottom: '8px' }}>
-										<Typography className='capitalize tracking-wide cursor-pointer !important' sx={{ fontSize: '19px', color: '#DC143C', fontFamily: 'unset', fontWeight: '600' }}>
-											<Link to={`/pokemon/${pokemon?.name}`}>
-												{pokemon?.name}
-										</Link>
-										</Typography>
-										<Typography sx={{ fontSize: '15px', fontWeight: '500', marginBottom: '12px', color: '#2F4F4F' }}>
-											{pokemon?.shortDescription}
-										</Typography>
-										<Typography className='flex'>
-											{pokemon.types.map((type, i) => (
-												<Box key={i} sx={{ background: getTagColor(type), fontFamily: 'unset' }} className='text-sm mr-1 px-2.5 py-0.5 font-normal'>
-													<Tooltip title='Pokemon Type'>{type}</Tooltip>
-												</Box>
-											))}
-										</Typography>
-									</CardContent>
-									<CardActions>
-										<Button size="small" sx={{ fontWeight: '700' }}>Learn More...</Button>
-									</CardActions>
-								</Box>
+								<Link to={`/pokemon/${pokemon?.name}`}>
+									<Box className='border-1 border-black bg-slate-50'>
+										<CardContent sx={{ padding: '16px 16px 16px 12px !important', height: '100%', marginBottom: '8px' }}>
+											<Typography className='capitalize tracking-wide cursor-pointer !important' sx={{ fontSize: '20px', color: '#DC143C', fontFamily: 'unset', fontWeight: '600' }}>
+												<Link to={`/pokemon/${pokemon?.name}`}>
+													{pokemon?.name}
+												</Link>
+											</Typography>
+											<Typography sx={{ fontSize: '15px', fontWeight: '500', marginBottom: '12px', color: '#2F4F4F' }}>
+												{pokemon?.shortDescription}
+											</Typography>
+											<Typography className='flex'>
+												{pokemon.types.map((type, i) => (
+													<Box key={i} sx={{ background: getTagColor(type), fontFamily: 'unset' }} className='text-sm mr-1 px-2.5 py-0.5 font-normal'>
+														<Tooltip title='Pokemon Type'>{type}</Tooltip>
+													</Box>
+												))}
+											</Typography>
+										</CardContent>
+										<CardActions>
+											<Button size="small" sx={{ fontWeight: '700' }}>Learn More...</Button>
+										</CardActions>
+									</Box>
+								</Link>
+								
 							</Card>
 						</Grid>
 					))

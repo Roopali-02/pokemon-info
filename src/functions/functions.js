@@ -1,3 +1,5 @@
+import { Box, Popover } from '@mui/material';
+import { InfoOutlined } from '@mui/icons-material';
 
 //Get pokemon type tag colors
 const getTagColor =(type)=>{
@@ -64,16 +66,97 @@ let colorCode = '';
   return colorCode;
 }
 
+// Api call to fetch ability related short info
+const displayInfo = async (ability)=>{
+  const response = await fetch(`https://pokeapi.co/api/v2/ability/${ability}`);
+  const abilityInfo = await response.json();
+  const englishEntry = abilityInfo.effect_entries.filter((entry) => entry.language.name === 'en').map((entry) => entry.short_effect);
+  console.log(englishEntry);
+  return englishEntry[0];
+ }
+
+// Format change to display national number
+const modifiedId = (id) => {
+  const idStr = id.toString();
+  return `#${idStr.padStart(4, '0')}`;
+};
+
+
+const displayValues = (pokemon, index, column, anchorEl, setAnchorEl, abilityInfo, setAbilityInfo) => {
+  switch (index) {
+    case 0:
+      return column === 1 ? modifiedId(pokemon?.id) : pokemon?.abilities.map((ability) => (
+      <Box key={ability}>
+      {ability} 
+          <InfoOutlined 
+
+          className='cursor-pointer pl-2'
+          onClick={async (event) => {
+            setAnchorEl(event.currentTarget);
+            const info = await displayInfo(ability);
+            setAbilityInfo(info);
+          }}
+          />
+        <Popover 
+          anchorEl={anchorEl} 
+          open={Boolean(anchorEl)} 
+          onClose={() => setAnchorEl(null)}
+            PaperProps={{
+              sx: { padding: '4px', background:'linear-gradient(to top, #e6b980 0%, #eacda3 100%)',width:'260px' }
+            }}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          >
+          {abilityInfo}
+      </Popover>
+      </Box>));
+    case 1:
+      return column === 1 ? pokemon?.species.map(each => each) : pokemon.growthRate;
+    case 2:
+      return column === 1 ? pokemon?.types.map(type => <Box className='px-1' sx={{ background: getTagColor(type), color:'#fff' }}>{type}</Box>) : pokemon.gender;
+    case 3:
+      return column === 1 ? `${pokemon?.height / 10} m` : pokemon.shape;
+    case 4:
+      return column === 1 ? `${pokemon?.weight / 10} kg` : pokemon.eggGroups;
+    case 5:
+      return column === 1 ? pokemon?.experience : pokemon.eggCycles;
+    case 6:
+      return column === 1 ? pokemon?.effortValue : pokemon.baseFriendship;
+    case 7:
+      return column === 1 ? pokemon?.catchRate : pokemon.home;
+    case 8:
+      return column === 1 ? pokemon?.generation : '';
+    default:
+      return '';
+  }
+};
+
 const fetchPokemonSpeciesData = async (pokemonData,isDashboard) => {
   const speciesResponse = await fetch(pokemonData.species.url);
   const speciesData = await speciesResponse.json();
-
+  console.log(speciesData);
+  console.log(pokemonData);
+  //Pokemon details in brief
+  const speciesType = speciesData.genera.filter(each => each.language.name === 'en').map((each) => each?.genus);
   const flavorTextEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
-  console.log(flavorTextEntry);
   const cleanFlavorText = flavorTextEntry
     ? flavorTextEntry.flavor_text.replace(/[\n\f]/g, ' ')
     : 'No description available';
 
+  //Pokemon effort value(EV yield) extraction
+  const evYield = pokemonData.stats.filter((stat) => stat.stat.name === 'special-attack').map((each) => each.effort);
+  const formattedEffortValue = ` ${evYield} Sp. Atk`
+
+  //pokemon gender calculation
+  const genderRate = speciesData.gender_rate;
+  const femalePercentage = genderRate >= 0 ? (genderRate / 8) * 100 : 0;
+  const malePercentage = genderRate >= 0 ? 100 - femalePercentage : 0;
 
   return {
     name: pokemonData.name,
@@ -84,6 +167,21 @@ const fetchPokemonSpeciesData = async (pokemonData,isDashboard) => {
     imageUrl: isDashboard ? pokemonData.sprites.front_default : pokemonData.sprites.other['official-artwork'].front_default,
     shortDescription: cleanFlavorText,
     statistics: pokemonData.stats,
+    species: speciesType,
+    abilities: pokemonData.abilities.map(ability => ability.ability.name),
+    shape: speciesData.shape.name,
+    growthRate: speciesData.growth_rate.name,
+    gender: genderRate >= 0 ? `${malePercentage}% Male, ${femalePercentage}% Female` : 'Genderless',
+    evolutionUrl: speciesData.evolution_chain.url,
+    experience: pokemonData.base_experience,
+    eggGroups: speciesData.egg_groups.map((group, index) => index < speciesData.egg_groups.length - 1 ? `${group.name},` : `${group.name}`),
+    catchRate: speciesData.capture_rate,
+    effortValue: formattedEffortValue,
+    eggCycles: speciesData.hatch_counter,
+    baseFriendship: speciesData.base_happiness,
+    home: speciesData.habitat.name,
+    generation: speciesData.generation.name,
+    moves: pokemonData.moves
   };
 };
 
@@ -123,6 +221,6 @@ const fetchPokemonDetails = async ({ setIsLoading, setPokemonDetails, name = nul
 };
 
 
-export { getTagColor, fetchPokemonDetails } ;
+export { getTagColor, fetchPokemonDetails, displayValues, modifiedId } ;
 
 

@@ -3,6 +3,7 @@ import { Box, MenuItem, Drawer, Button, useMediaQuery } from '@mui/material';
 import { MenuOutlined } from '@mui/icons-material'
 import user from '../assets/user.png';
 import logo from '../assets/logo.png';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [drawerVisible,setDrawerVisible] = useState(false);
@@ -26,7 +27,7 @@ const Navbar = () => {
                 fontWeight:'bold' 
               },
               fontFamily:'monospace'
-            }}>{page}</Button>
+            }}><Link to={`${page === 'Home'?'/':'/news'}`}>{page}</Link></Button>
           ))}
           {!isNonMobile &&<MenuOutlined className="text-white ml-2" onClick={toggleDrawer}></MenuOutlined>}
           <Drawer
@@ -42,7 +43,7 @@ const Navbar = () => {
               onKeyDown={() => setDrawerVisible(false)}
             >
               {pages.map((page, i) => (
-                <MenuItem key={i} sx={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '16px', color:'#2C5364'}}>{page}</MenuItem>
+             <MenuItem key={i} sx={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '16px', color:'#2C5364'}}>{page}</MenuItem>
               ))}
             </Box>
           </Drawer>
