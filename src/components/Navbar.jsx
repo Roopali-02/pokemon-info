@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react';
+import React,{useState} from 'react';
 import { Box, MenuItem, Drawer, Button, useMediaQuery } from '@mui/material';
 import { MenuOutlined } from '@mui/icons-material'
 import user from '../assets/user.png';
@@ -7,12 +7,11 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [drawerVisible,setDrawerVisible] = useState(false);
-  const pages = ['Home', 'Pokedex', 'Events','News'];
+  const pages = ['Home', 'Moves','News'];
   const isNonMobile = useMediaQuery('(min-width: 600px)');
   const toggleDrawer = ()=>{
     setDrawerVisible(!drawerVisible);
   }
-  console.log(isNonMobile);
 
   return (
     <Box className= 'flex justify-between items-center p-3 rounded-tl-lg rounded-tr-lg sticky top-0 z-40'
@@ -27,7 +26,9 @@ const Navbar = () => {
                 fontWeight:'bold' 
               },
               fontFamily:'monospace'
-            }}><Link to={`${page === 'Home'?'/':'/news'}`}>{page}</Link></Button>
+            }}>
+            <Link to={`${page === 'Home'?'/':page==='Moves'?'/move-info':'/news'}`}>{page}</Link>
+            </Button>
           ))}
           {!isNonMobile &&<MenuOutlined className="text-white ml-2" onClick={toggleDrawer}></MenuOutlined>}
           <Drawer

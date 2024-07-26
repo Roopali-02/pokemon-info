@@ -140,8 +140,6 @@ const displayValues = (pokemon, index, column, anchorEl, setAnchorEl, abilityInf
 const fetchPokemonSpeciesData = async (pokemonData,isDashboard) => {
   const speciesResponse = await fetch(pokemonData.species.url);
   const speciesData = await speciesResponse.json();
-  console.log(speciesData);
-  console.log(pokemonData);
   //Pokemon details in brief
   const speciesType = speciesData.genera.filter(each => each.language.name === 'en').map((each) => each?.genus);
   const flavorTextEntry = speciesData.flavor_text_entries.find(entry => entry.language.name === 'en');
@@ -194,8 +192,6 @@ const fetchPokemonDetails = async ({ setIsLoading, setPokemonDetails, name = nul
     setIsLoading(true);
     const response = await fetch(name ? pokemonPageUrl : dashboardUrl);
     const data = await response.json();
-    console.log(data);
-
     if (name) {
       let isDashboard = false;
       // Fetch details for a single Pokémon

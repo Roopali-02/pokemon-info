@@ -8,6 +8,7 @@ import specialMove from '../assets/move-special.png';
 import physicalMove from '../assets/move-physical.png';
 import statusMove from '../assets/move-status.png';
 import { Link } from 'react-router-dom';
+import {constants} from '../constants';
 
 const Pokemon = () => {
 	let { name } = useParams();
@@ -22,13 +23,6 @@ const Pokemon = () => {
 	const [moves, setMoves] = useState([]);
 	const [resizeKey, setResizeKey] = useState(0); 
 	const [newDetails,setNewDetails] = useState([]);
-	const dataTableStyles = {
-		'& .MuiDataGrid-columnHeader': { backgroundColor: '#CFDEF3', },
-		'& .MuiDataGrid-footerContainer': { backgroundColor: '#CFDEF3' },
-		'& .MuiTablePagination-selectLabel': { fontWeight: '600' },
-		'& .MuiTablePagination-displayedRows': { fontWeight: '600' },
-		'& .MuiTablePagination-input': { fontWeight: '600' },
-	}
 
 	useEffect(() => {
 		const handleResize = () => setResizeKey(prevKey => prevKey + 1);
@@ -36,9 +30,6 @@ const Pokemon = () => {
 		return () => window.removeEventListener('resize', handleResize);
 	}, []);
 
-
-	const sectionOneParams = ['National No.', 'Species', 'Type', 'Height', 'Weight', <Tooltip title='Base Experience'>Base Exp.</Tooltip>, <Tooltip title='Effort Value'>EV yield</Tooltip>,'Catch Rate','Generation'];
-	const sectionTwoParams = ['Abilities', 'Growth Rate', 'Gender', 'Shape', 'Egg Groups', 'Egg Cycles', <Tooltip title='Base Friendship'>Base Fri.</Tooltip>,'Habitat'];
 	useEffect(() => {
 		fetchPokemonDetails({ setIsLoading, setPokemonDetails: setPokemon, name });
 	}, [name]);
@@ -48,43 +39,38 @@ const Pokemon = () => {
 	},[])
 
 	const pageOrderData = useMemo(() => {
-		const currentPokemon = newDetails.find((each) => each.id === pokemon.id);
-		const previousPokemon = newDetails.find((each) => each.id === pokemon.id - 1);
-		const nextPokemon = newDetails.find((each) => each.id === pokemon.id + 1);
+		const currentPokemon = newDetails.find((each) => each?.id === pokemon?.id);
+		const previousPokemon = newDetails.find((each) => each?.id === pokemon?.id - 1);
+		const nextPokemon = newDetails.find((each) => each?.id === pokemon?.id + 1);
 		return { prev: previousPokemon, next: nextPokemon, current: currentPokemon };
 	}, [newDetails,pokemon]);
 
-	console.log(newDetails);
 	const parseEvolutionChain =async (chain) => {
 		let evolutions = [];
 		let current = chain;
 		while (current) {
-				const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${current.species.name}`)
-				const data = await response.json();
-				console.log(data);
+			const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${current.species.name}`)
+			const data = await response.json();
 			evolutions.push({
-				name: current.species.name,
-				url: current.species.url,
-				imageUrl: data.sprites.other['official-artwork'].front_default
+			name: current.species.name,
+			url: current.species.url,
+			imageUrl: data.sprites.other['official-artwork'].front_default
 			});
 			current = current.evolves_to[0];
 		}
 		return evolutions;
 	};
 	
-
 	useEffect(() => {
 		if (pokemon?.id) {
 			const getSpeciesRelatedData = async () => {
 				setIsLoading(true);
 				const response = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${pokemon?.id}/`);
 				const data = await response.json();
-				console.log(data);
 				const evolutionResponse = await fetch(pokemon.evolutionUrl);
 				const evolutionData = await evolutionResponse.json();
 				const evolutions = await parseEvolutionChain(evolutionData.chain);
 				setEvolutionData(evolutions);
-				console.log(evolutions);
 				const onlyEnglishEntries = data?.flavor_text_entries.filter((entry) => entry.language.name === 'en').map((each) => each.flavor_text.replace(/[\n\f]/g, ' '));
 				let uniqueValues = [...new Set(onlyEnglishEntries)].slice(0, 6);
 				setDetails(uniqueValues);
@@ -106,7 +92,6 @@ const Pokemon = () => {
 						};
 					})
 				);
-				console.log(movesData);
 				setMoves(movesData);
 				setIsLoading(false);
 			};
@@ -115,25 +100,30 @@ const Pokemon = () => {
 	}, [pokemon]);
 
 	const categorizedMoves = (moves, type) => {
-		console.log(moves);
 		return moves.filter((move) => move.method === type);
 	};
 
 	const columnTitle = (title)=>{
-		return <Typography sx={{ fontWeight: '600', fontSize: '14px' }}>{title}</Typography>
+		return <Box className='font-bold font-sans'>{title}</Box>
 	}
 
 	//Moves related Table columns
 	const columns = [
 		{
-			field: 'level', headerName: columnTitle('Level'), flex:1, description: 'jjj', headerAlign: 'left',
-			align: 'left', },
-		{ field: 'move', headerName: columnTitle('Move'), 
-			flex: 1 ,
+			field: 'level', 
+			headerName: columnTitle('Level'), 
+			width:60,
+			headerAlign: 'left',
+			align: 'left', 
+		},
+		{ field: 'move', 
+			headerName: columnTitle('Move'), 
+			width:140,
 			renderCell: (params) => (
 				<Box
 					sx={{ color:'#2C5364'}}
-				className='font-bold'
+					className='font-bold capitalize font-sans'
+					title={params.value ? params.value : '---'}
 				>
 					{params.value}
 				</Box>
@@ -141,7 +131,9 @@ const Pokemon = () => {
 		
 		},
 		{
-			field: 'type', headerName: columnTitle('Type'), flex: 1 ,
+			field: 'type', 
+			headerName: columnTitle('Type'), 
+			width: 90,
 			renderCell: (params) => (
 				<Box className="h-full flex items-center">
 					<Box className='flex items-center justify-center h-2/4 px-3' sx={{ background: getTagColor(params.row.type),color:'#fff' }}>{params.row.type}</Box>
@@ -149,28 +141,32 @@ const Pokemon = () => {
 			)
 		},
 
-		{ field: 'category', headerName: columnTitle('Category'), flex: 1 ,
+		{ field: 'category', 
+			headerName: columnTitle('Category'), 
+			width: 100,
 			renderCell:({row:{category}})=>(
 				<Box className='flex justify-center items-center h-full'>
 					<Tooltip title={`${category === 'physical'? 'physical': category === 'special'?'special':'status'}`}>
-						<img src={category === 'physical' ? physicalMove : category === 'special' ? specialMove : statusMove} alt='category' width={30} height={30}></img>
-				</Tooltip>
-					</Box>
+						<img src={category === 'physical' ? physicalMove : category === 'special' ? specialMove : statusMove} alt='category' width={30} height={30}/>
+					</Tooltip>
+				</Box>
 			)
 		},
 		{ field: 'power', 
 			headerName: columnTitle('Power'),
+			width:90,
 		  renderCell:({row:{power}})=>{ 
-         return <Box>{power?power:'---'}</Box>
+				return <Box className='font-semibold text-neutral-600'>{power?power:'---'}</Box>
 			}
 		},
-		{ field: 'accuracy', headerName: columnTitle('Accuracy'), flex: 1 ,
+		{ field: 'accuracy', 
+			headerName: columnTitle('Accuracy'), 
+			flex:1,
 			renderCell: ({ row: { accuracy } }) => {
-				return <Box>{accuracy ? accuracy : '---'}</Box>
+				return <Box className='font-semibold text-neutral-600'>{accuracy ? accuracy : '---'}</Box>
 			}
 		},
 	]
-
 
 	if (isLoading) {
 		return (
@@ -195,12 +191,7 @@ const Pokemon = () => {
 		);
 	}
 	if (!pageOrderData.current) return null;
-	const maxStatValue = pokemon ? Math.max(...pokemon.statistics.map(stat => stat.base_stat)) : 100;
-
-
-
 	return (
-		
 			<Box className='bg-slate-50 mt-4'>
 			<Box className='flex justify-between items-center'>
 				<Box className='capitalize cursor-pointer text-base font-semibold text-blue-500'>
@@ -213,9 +204,9 @@ const Pokemon = () => {
 				</Box>
 				<Box className='capitalize cursor-pointer text-base font-semibold text-blue-500'>
 					{pageOrderData.next && (
-
-						<Link to={`/pokemon/${pageOrderData.next.name}`}>{`${modifiedId(pageOrderData.next.id)} ${pageOrderData.next.name}`} <ArrowRightOutlined /></Link>
-						
+						<Link to={`/pokemon/${pageOrderData.next.name}`}>{`${modifiedId(pageOrderData.next.id)} ${pageOrderData.next.name}`} 
+							<ArrowRightOutlined />
+						</Link>
 					)}
 				</Box>
 			</Box>
@@ -227,53 +218,53 @@ const Pokemon = () => {
 						<Box className="basis-2/4 bg-black">
 							<img alt="pokemon" src={pokemon?.imageUrl} />
 						</Box>
-						<Box className='mt-3 text-sky-950'>
-							<Typography variant="h5" sx={{ fontWeight: 'bold' }}>Base Statistics</Typography>
-						</Box>
-						<Box>
+					<Box className='mt-2' sx={{ background: 'linear-gradient(to top, #dfe9f3 0%, white 65%)' }}>
+						<Box className='p-2.5 font-semibold text-3xl'>{constants.baseStatistics}</Box>
+						<Box className='p-2.5' >
 							{pokemon?.statistics.map((stat, index) => (
 								<Box className="flex py-2 items-center" key={stat.stat.name}>
-									<Box className="basis-1/3 text-nowrap capitalize text-base">{index === 0 ? <Tooltip title='Hit Points'>{stat.stat.name}</Tooltip> : stat.stat.name}</Box>
+									<Box className="basis-1/3 text-nowrap capitalize font-semibold text-neutral-500" sx={{fontSize:'18px'}}>{index === 0 ? <Tooltip title='Hit Points'>{stat.stat.name}</Tooltip> : stat.stat.name}</Box>
 									<Box className="basis-1/12 font-bold">{stat.base_stat}</Box>
 									<Box className="basis-3/5">
 										<LinearProgress variant="determinate" sx={{
 											backgroundColor: '#d7d2cc',
 											'& .MuiLinearProgress-bar': {
-												backgroundColor: '#48b1bf'
+												backgroundColor: '#a7a6cb',
 											},
 											height: '8px',
 										}}
-											// value={stat.base_stat} 
-											value={Math.min((stat.base_stat / maxStatValue) * 100, 100)}
+											 value={stat.base_stat}
 										/>
 									</Box>
 								</Box>
 							))}
 						</Box>
 					</Box>
+					</Box>
 					<Box className={`basis-2/4 px-2`}>
-					<Box className='text-sky-950'><Typography variant="h4" sx={{ fontWeight: 'bold' }}>Pokédex data</Typography></Box>
-						<Box>
+					<Box className='text-4xl font-semibold'>{constants.pokedexDataTitle}</Box>
+						<Box className='my-3'>
 							{details.map((info, index) => (
-								<Typography className="text-sm pb-0.5" key={index}>{info}</Typography>
+								<Box className=" pb-0.5 font-semibold text-neutral-600" key={index}>{info}</Box>
 							))}
 						</Box>
-
-						<Card className="mt-3" sx={{ maxWidth: '100%' }}>
-							<CardContent>
-								<Box className="mb-3 text-sky-950"><Typography variant="h5" sx={{ fontWeight: 'bold' }}>Info (Training , Breeding & Other)</Typography></Box>
+						<Card className="mt-6" sx={{ maxWidth: '100%' }}>
+							<CardContent className="pb-6" sx={{
+								background: 'linear-gradient(to bottom, #dfe9f3 0%, white 65%)'
+								 }}>
+							<Box className="mb-3"><Typography variant="h5" sx={{ fontWeight: 'bold' }}>{constants.otherInfo}</Typography></Box>
 								<Box className="flex border-3 border-blue-300">
 									<Box className="basis-2/4 text-base">
 										{
-											sectionOneParams.map((param, index) => (
-												<Box className="flex mb-4 last:mb-0" key={param}><Typography className="basis-2/5 text-nowrap" sx={{ fontWeight: '600', fontFamily: 'cursive', fontSize: '15px' }}>{param}</Typography><Typography className="flex gap-x-1 basis-3/5 p-0.5 capitalize" sx={{ fontWeight: '600', fontFamily: 'monospace', color: '#1e3c72' }}>{displayValues(pokemon, index, 1, anchorEl, setAnchorEl)}</Typography></Box>
+											constants.sectionOneParams.map((param, index) => (
+												<Box className="flex mb-5 last:mb-0" key={param}><Typography className="basis-2/5 text-nowrap text-neutral-600" sx={{ fontWeight: '600', fontFamily: 'cursive', fontSize: '15px' }}>{param}</Typography><Typography className="flex gap-x-1 basis-3/5 p-0.5 capitalize" sx={{ fontWeight: '600', fontFamily: 'monospace', color: '#1e3c72' }}>{displayValues(pokemon, index, 1, anchorEl, setAnchorEl)}</Typography></Box>
 											))
 										}
 									</Box>
 									<Box className="basis-2/4 text-base">
 										{
-											sectionTwoParams.map((param, index) => (
-												<Box className="flex mb-4 last:mb-0" key={param}><Typography className="basis-2/5" sx={{ fontWeight: '600', fontFamily: 'cursive', fontSize: '15px' }}>{param}</Typography><Typography className="basis-3/5 capitalize" sx={{ fontWeight: '600', fontFamily: 'monospace', color: '#1e3c72' }}>{displayValues(pokemon, index, 2, anchorEl, setAnchorEl, abilityInfo, setAbilityInfo)}</Typography></Box>
+											constants.sectionTwoParams.map((param, index) => (
+												<Box className="flex mb-5 last:mb-0" key={param}><Typography className="basis-2/5 text-neutral-600" sx={{ fontWeight: '600', fontFamily: 'cursive', fontSize: '15px' }}>{param}</Typography><Typography className="basis-3/5 capitalize" sx={{ fontWeight: '600', fontFamily: 'monospace', color: '#1e3c72' }}>{displayValues(pokemon, index, 2, anchorEl, setAnchorEl, abilityInfo, setAbilityInfo)}</Typography></Box>
 											))
 										}
 									</Box>
@@ -282,8 +273,11 @@ const Pokemon = () => {
 						</Card>
 					</Box>
 				</Box>
-				<Box className="mb-4">
-					<Box className='p-2 text-sky-950'><Typography variant='h5' sx={{ fontWeight: 'bold' }}>Evolution Chart</Typography></Box>
+				<Box className="my-6">
+				<Box className='p-2'>
+					<Typography variant='h5' sx={{ fontWeight: 'bold' }}>{constants.evolutionChart}</Typography>
+				</Box>
+				<Box className='bg-slate-100 px-2 py-3 text-neutral-600 font-semibold'>{constants.briefEvolutionData}</Box>
 					<Box className='flex justify-center items-center pb-2' sx={{ background: 'linear-gradient(to top, #d5d4d0 0%, #d5d4d0 1%, #eeeeec 31%, #efeeec 75%, #e9e9e7 100%)' }}>
 						{evolutionData.map((each, index) => (
 							<Box className='flex items-center' key={index}>
@@ -297,11 +291,18 @@ const Pokemon = () => {
 						))}
 					</Box>
 				</Box>
-				<Box className='text-3xl font-bold mb-3 text-sky-950'>Moves</Box>
+				<Box className='my-6'>
+			<Box className='text-3xl font-semibold mb-3'>{constants.moves}</Box>
 				<Box key={resizeKey} className={`flex w-full gap-x-2 ${isNonMobileTable ? 'flex-row' : 'flex-col'} mb-3`}>
-					<Box className='flex flex-col basis-2/4' sx={dataTableStyles}>
-						<Box sx={{ color: '#BE5869' }} className='mb-2'><Typography variant='h5' sx={{ fontWeight: 'bold' }}>Moves learnt by level up</Typography></Box>
-
+					<Box className = 'flex flex-col basis-2/4'
+					sx = {
+						{
+							...constants.dataTableStyles
+						}
+					} >
+						<Box className='text-xl font-semibold p-2' sx={{ color: '#fff', background:'linear-gradient(to right, #4b79a1, #283e51)'}}>
+						{constants.levelUpMoves}
+						</Box>
 						<DataGrid
 							columns={columns}
 							rows={categorizedMoves(moves, 'level-up')}
@@ -312,10 +313,14 @@ const Pokemon = () => {
 							}}
 							pageSizeOptions={[10, 20]}
 						/>
-
 					</Box>
-					<Box className='flex flex-col basis-2/4' sx={dataTableStyles}>
-						<Box sx={{ color: '#BE5869' }} className='mb-2'><Typography variant='h5' sx={{ fontWeight: 'bold' }}>Moves learnt by TM(Technical Machines)</Typography></Box>
+				<Box 
+					className='flex flex-col basis-2/4' 
+					sx={{...constants.dataTableStyles}}
+				>
+						<Box className='text-xl font-semibold p-2 text-white' sx={{background: 'linear-gradient(to right, #4b79a1, #283e51)' }}>
+					{constants.technicalMachineMoves}
+						</Box>
 						<DataGrid
 							columns={columns}
 							rows={categorizedMoves(moves, 'machine')}
@@ -328,6 +333,7 @@ const Pokemon = () => {
 						/>
 					</Box>
 				</Box>
+			</Box>
 			</Box>
 	
 	);

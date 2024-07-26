@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {constants} from '../constants';
 import {
 	Box,
 	Typography,
@@ -10,11 +11,9 @@ import {
 	CardMedia,
 	CardContent,
 	CardActions,
-	Button,
 	Skeleton,
 	Tooltip
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import { getTagColor, fetchPokemonDetails } from '../functions/functions';
 import emptyData from '../assets/emptyData.jpg';
 import { Link } from 'react-router-dom';
@@ -25,7 +24,7 @@ const SectionTwo = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [searchText, setSearchText] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
-	const itemsPerPage = 10;
+	const itemsPerPage = 20;
 
 	useEffect(() => {
 		fetchPokemonData();
@@ -58,16 +57,23 @@ const SectionTwo = () => {
 		<Box className='flex flex-col justify-center items-center mt-5 z-30'>
 			<Box className='mb-5'>
 				<Typography variant='h4' sx={{ color: '#355C7D', fontWeight: 'bold' }}>
-					Search for a Pokemon by name
+						{constants.searchHeading}
 				</Typography>
 			</Box>
-			<Box display='flex' backgroundColor='#000' borderRadius='3px' className='flex mb-5 p-2'>
+			<Box display='flex' backgroundColor='' borderRadius='3px' className='flex justify-center mb-5 p-2 w-full'>
 				<InputBase
-					sx={{ width: isNonMobile ? '550px' : '250px', background: '#000', paddingLeft: '10px', color: '#fff' }}
+					sx = {
+						{
+							width: isNonMobile ? '550px' : '100%',
+							padding: '8px',
+							color: '#fff',
+							background: 'linear-gradient(to right, #757f9a, #d7dde8)'
+						}
+					}
 					placeholder='Search'
 					onChange={handleSearchChange}
 				/>
-				<Search sx={{ color: "#fff", height: 'unset' }} />
+				{/* <Search sx={{ color: "#fff", height: 'unset' }} /> */}
 			</Box>
 			<Grid container direction="row" justifyContent="flex-start" alignItems="flex-start" spacing={2}>
 				{isLoading ? (
@@ -96,7 +102,7 @@ const SectionTwo = () => {
 								<Box Box className = 'flex justify-center items-center'
 								sx = {
 									{
-										background:'linear-gradient(to right, #434343 0%, black 100%);'
+										 background: 'linear-gradient(to top, #e6e9f0 20%, #eef1f5 100%)'
 									}
 								} >
 									<Tooltip title={pokemon.name}>
@@ -110,26 +116,26 @@ const SectionTwo = () => {
 									</Tooltip>
 								</Box>
 								<Link to={`/pokemon/${pokemon?.name}`}>
-									<Box className='border-1 border-black bg-slate-50'>
-										<CardContent sx={{ padding: '16px 16px 16px 12px !important', height: '100%', marginBottom: '8px' }}>
+									<Box className='border-1 border-black bg-slate-50 pb-2' sx={{ 
+										background: 'linear-gradient(-225deg, #FFFEFF 0%, #ebedee 100%)',
+										}}>
+										<CardContent sx={{ padding: '16px 16px 0px 12px !important', height: '100%', marginBottom: '8px' }}>
 											<Typography className='capitalize tracking-wide cursor-pointer !important' sx={{ fontSize: '20px', color: '#DC143C', fontFamily: 'unset', fontWeight: '600' }}>
 												<Link to={`/pokemon/${pokemon?.name}`}>
 													{pokemon?.name}
 												</Link>
 											</Typography>
-											<Typography sx={{ fontSize: '15px', fontWeight: '500', marginBottom: '12px', color: '#2F4F4F' }}>
-												{pokemon?.shortDescription}
-											</Typography>
-											<Typography className='flex'>
+											<Box className='mb-3 font-semibold text-neutral-500'>{pokemon?.shortDescription}</Box>
+											<Box className='flex'>
 												{pokemon.types.map((type, i) => (
-													<Box key={i} sx={{ background: getTagColor(type), fontFamily: 'unset' }} className='text-sm mr-1 px-2.5 py-0.5 font-normal'>
+													<Box key={i} sx={{ background: getTagColor(type),color:'#fff', fontFamily: 'unset' }} className='text-sm mr-1 px-2.5 py-0.5 font-normal'>
 														<Tooltip title='Pokemon Type'>{type}</Tooltip>
 													</Box>
 												))}
-											</Typography>
+											</Box>
 										</CardContent>
-										<CardActions>
-											<Button size="small" sx={{ fontWeight: '700' }}>Learn More...</Button>
+										<CardActions className='capitalize font-semibold text-blue-600' sx={{paddingLeft:'12px'}}>
+											<Box classsName='font-semibold'>{constants.learnMore}</Box>
 										</CardActions>
 									</Box>
 								</Link>
