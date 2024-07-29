@@ -44,7 +44,7 @@ const Navbar = () => {
               onKeyDown={() => setDrawerVisible(false)}
             >
               {pages.map((page, i) => (
-             <MenuItem key={i} sx={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '16px', color:'#2C5364'}}>{page}</MenuItem>
+             <MenuItem key={i} sx={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '16px', color:'#2C5364'}}><Link to={`${page === 'Home'?'/':page==='Moves'?'/move-info':'/news'}`}>{page}</Link></MenuItem>
               ))}
             </Box>
           </Drawer>
