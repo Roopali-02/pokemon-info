@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Tooltip, Skeleton, Button } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import {
+	useParams,
+	Link
+} from 'react-router-dom';
 import { DataGrid } from '@mui/x-data-grid';
 import { constants } from '../constants/index';
 import { getTagColor } from '../functions/functions';
 import specialMove from '../assets/move-special.png';
 import physicalMove from '../assets/move-physical.png';
 import statusMove from '../assets/move-status.png';
-import { Link } from 'react-router-dom';
+
 
 const Moves = () => {
 	let { id } = useParams();
@@ -43,7 +46,7 @@ const Moves = () => {
 
 	const formattedMoves = async (movesArr) => {
 		const moveDataUrls = movesArr.map(move => move.moveUrl);
-		const moveData = await fetchInBatches(moveDataUrls, 50); // Adjust the batch size as needed
+		const moveData = await fetchInBatches(moveDataUrls, 100); // Adjust the batch size as needed
 		const finalArr = moveData.map((data, index) => formatMoveDetails(movesArr[index].name, data));
 		setAllMoves(finalArr);
 		setLoading(false);
@@ -80,17 +83,67 @@ const Moves = () => {
 		getData();
 	}, [id]);
 
+	// const cachedFetch = (() => {
+	// 	const cache = {};
+	// 	return async (url) => {
+	// 		if (!cache[url]) {
+	// 			try {
+	// 				console.log(`Fetching URL: ${url}`); // Log the URL being fetched
+	// 				const response = await fetch(url);
+	// 				console.log(`Response Status: ${response.status}`); // Log the response status
+	// 				const responseBody = await response.text();
+	// 				try {
+	// 					const data = JSON.parse(responseBody);
+	// 					cache[url] = data;
+	// 				} catch (jsonError) {
+	// 					console.error(`Failed to parse JSON from ${url}:`, jsonError);
+	// 					console.error(`Response body: ${responseBody}`);
+	// 					throw jsonError;
+	// 				}
+	// 			} catch (error) {
+	// 				console.error(`Failed to fetch ${url}:`, error);
+	// 				throw error;
+	// 			}
+	// 		}
+	// 		return cache[url];
+	// 	};
+	// })();
+
 	const cachedFetch = (() => {
 		const cache = {};
-		return async (url) => {
+		return async (url, retries = 3) => {
 			if (!cache[url]) {
-				const response = await fetch(url);
-				const data = await response.json();
-				cache[url] = data;
+				try {
+					console.log(`Fetching URL: ${url}`);
+					const response = await fetch(url);
+					console.log(`Response Status: ${response.status}`);
+					const responseBody = await response.text();
+
+					try {
+						const data = JSON.parse(responseBody);
+						cache[url] = data;
+					} catch (jsonError) {
+						console.error(`Failed to parse JSON from ${url}:`, jsonError);
+						console.error(`Response body: ${responseBody}`);
+						if (retries > 0) {
+							console.log(`Retrying... (${3 - retries} retries left)`);
+							return await cachedFetch(url, retries - 1);
+						}
+						throw jsonError;
+					}
+				} catch (error) {
+					console.error(`Failed to fetch ${url}:`, error);
+					if (retries > 0) {
+						console.log(`Retrying... (${3 - retries} retries left)`);
+						return await cachedFetch(url, retries - 1);
+					}
+					throw error;
+				}
 			}
 			return cache[url];
 		};
 	})();
+
 
 	const columns = [
 		{ 
