@@ -71,7 +71,6 @@ const displayInfo = async (ability)=>{
   const response = await fetch(`https://pokeapi.co/api/v2/ability/${ability}`);
   const abilityInfo = await response.json();
   const englishEntry = abilityInfo.effect_entries.filter((entry) => entry.language.name === 'en').map((entry) => entry.short_effect);
-  console.log(englishEntry);
   return englishEntry[0];
  }
 

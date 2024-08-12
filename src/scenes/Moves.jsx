@@ -16,11 +16,6 @@ const Moves = () => {
 	let { id } = useParams();
 	const [loading,setLoading] = useState(true);
 	const [allMoves, setAllMoves] = useState([]);
-	const fetchData = async (url) => {
-		const response = await fetch(url);
-		const data = await response.json();
-		return data;
-	};
 
 	//Structured final data array
 	const formatMoveDetails = (moveName, moveData) => ({
@@ -46,7 +41,7 @@ const Moves = () => {
 
 	const formattedMoves = async (movesArr) => {
 		const moveDataUrls = movesArr.map(move => move.moveUrl);
-		const moveData = await fetchInBatches(moveDataUrls, 100); // Adjust the batch size as needed
+		const moveData = await fetchInBatches(moveDataUrls, 150); // Adjust the batch size as needed
 		const finalArr = moveData.map((data, index) => formatMoveDetails(movesArr[index].name, data));
 		setAllMoves(finalArr);
 		setLoading(false);
@@ -55,16 +50,26 @@ const Moves = () => {
 
 	useEffect(() => {
 		const getData = async () => {
-			let url = id ? `https://pokeapi.co/api/v2/generation/${id}/` : 'https://pokeapi.co/api/v2/move/';
+			let offset = 0;
+			const limit = 150;
+			let url = id ? `https://pokeapi.co/api/v2/generation/${id}/` : `https://pokeapi.co/api/v2/move?offset=${offset}&limit=${limit}`;
 			const allMoveUrls = [];
 
-			// Function to fetch all pages of moves
+			//Function to fetch all pages of moves
 			const fetchAllMoves = async () => {
 				while (url) {
-					const data = await cachedFetch(url);
-					// Add the current page's moves to allMoveUrls
-					allMoveUrls.push(...data.results.map((move) => ({ name: move.name, moveUrl: move.url })));
-					url = data.next;  // Update the URL for the next page, if available
+					try{
+						const data = await cachedFetch(url);
+						if(data){
+							allMoveUrls.push(...data.results.map((move) => ({ name: move.name, moveUrl: move.url })));
+							offset += limit;
+							url = data.next;  // Update the URL for the next page, if available
+						} else {
+							url = null; // Exit loop if no more data
+						}
+					}catch(errors){
+						url = null; // Exit loop on error
+					}
 				}
 				return allMoveUrls;
 			};
@@ -72,8 +77,16 @@ const Moves = () => {
 			// Fetch data based on whether ID is provided or not
 			if (id) {
 				const data = await cachedFetch(url);
-				const moves = data.moves.map(move => ({ name: move.name, moveUrl: move.url }));
+				 if (data) {
+				const moves = data.moves.map(move => ({
+					name: move.name,
+					moveUrl: move.url
+				}));
 				const detailedMoves = await formattedMoves(moves);
+				 } else {
+				 	console.warn(`Skipping move ID ${id} due to fetch error.`);
+				 }
+				
 			} else {
 				const allMoveUrls = await fetchAllMoves();
 				const detailedMoves = await formattedMoves(allMoveUrls);
@@ -83,58 +96,25 @@ const Moves = () => {
 		getData();
 	}, [id]);
 
-	// const cachedFetch = (() => {
-	// 	const cache = {};
-	// 	return async (url) => {
-	// 		if (!cache[url]) {
-	// 			try {
-	// 				console.log(`Fetching URL: ${url}`); // Log the URL being fetched
-	// 				const response = await fetch(url);
-	// 				console.log(`Response Status: ${response.status}`); // Log the response status
-	// 				const responseBody = await response.text();
-	// 				try {
-	// 					const data = JSON.parse(responseBody);
-	// 					cache[url] = data;
-	// 				} catch (jsonError) {
-	// 					console.error(`Failed to parse JSON from ${url}:`, jsonError);
-	// 					console.error(`Response body: ${responseBody}`);
-	// 					throw jsonError;
-	// 				}
-	// 			} catch (error) {
-	// 				console.error(`Failed to fetch ${url}:`, error);
-	// 				throw error;
-	// 			}
-	// 		}
-	// 		return cache[url];
-	// 	};
-	// })();
-
 	const cachedFetch = (() => {
 		const cache = {};
 		return async (url, retries = 3) => {
 			if (!cache[url]) {
 				try {
-					console.log(`Fetching URL: ${url}`);
 					const response = await fetch(url);
-					console.log(`Response Status: ${response.status}`);
 					const responseBody = await response.text();
 
 					try {
 						const data = JSON.parse(responseBody);
 						cache[url] = data;
 					} catch (jsonError) {
-						console.error(`Failed to parse JSON from ${url}:`, jsonError);
-						console.error(`Response body: ${responseBody}`);
 						if (retries > 0) {
-							console.log(`Retrying... (${3 - retries} retries left)`);
 							return await cachedFetch(url, retries - 1);
 						}
 						throw jsonError;
 					}
 				} catch (error) {
-					console.error(`Failed to fetch ${url}:`, error);
 					if (retries > 0) {
-						console.log(`Retrying... (${3 - retries} retries left)`);
 						return await cachedFetch(url, retries - 1);
 					}
 					throw error;
@@ -215,7 +195,7 @@ const Moves = () => {
 		}
 	];
 
-	const LoadingOverlay = () => (
+	const LoadingOverlay = ()=> (
 		<Box className='flex flex-col p-2' sx={{gap:2}}>
 			{Array.from({ length: 15 }).map((_, index) => (
 				<Box key={index} className='flex items-center'>
@@ -227,7 +207,6 @@ const Moves = () => {
 
 	return (
 		<Box>
-		
 			<Box className='my-2 font-semibold text-center text-4xl'>
 				{id ? `Pokémon moves from Generation ${id}` : constants.moveListTitle}
 			</Box>
@@ -238,14 +217,11 @@ const Moves = () => {
 							rows={loading ? [] : allMoves}
 							columns={columns}
 							loading={loading}
-							slots={{
-								loadingOverlay: LoadingOverlay,
+							slots={{loadingOverlay: LoadingOverlay}}
+							slotProps={{loadingOverlay: {
+									sx: { height: '100%' },
+								},
 							}}
-					slotProps={{
-						loadingOverlay: {
-							sx: { height: '100%' },
-						},
-					}}
 							initialState={{
 								pagination: {
 									paginationModel: { page: 0, pageSize: 20 },

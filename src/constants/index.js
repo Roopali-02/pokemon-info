@@ -44,7 +44,7 @@ export const constants = {
 
   //News Section constants
   mainNewsTitle:'Pokémon News',
-  pokemonNews: ["Welcome to The Pokémon News! We believe in making Pokémon information as clear and easy to digest as possible.", "On this page below you'll find the recent Pokémon news and updates to this site.Delve deeper using the menu above to find detailed Pokédex entries, attack stats, evolution chains and our thriving community of awesome Pokéfans who'll answer your questions. And much more besides!"],
+  pokemonNews: ["Welcome to The Pokémon News! We believe in making Pokémon information as clear and easy to digest as possible","On this page below you'll find the recent Pokémon news and updates to this site.Delve deeper using the menu above to find detailed Pokédex entries, attack stats, evolution chains and our thriving community of awesome Pokéfans who'll answer your questions. And much more besides!"],
 
   //Footer Section constants
   privacyPolicy:'Privacy policy',

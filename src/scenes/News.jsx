@@ -52,8 +52,8 @@ const News = () => {
 			<Box className='my-3 text-3xl font-semibold text-center'>{constants.mainNewsTitle}</Box>
 			<Box className=' mb-3'>
 			{
-				constants.pokemonNews.map((info)=>(
-					<Box className=' text-neutral-500 font-semibold bg-neutral-100 py-2 pl-2 rounded-md'>{info}</Box>
+				constants.pokemonNews.map((info,index)=>(
+					<Box key={index} className=' text-neutral-500 font-semibold bg-neutral-100 py-2 pl-2  mb-2'>{info}</Box>
 				))
 			}
 			</Box>

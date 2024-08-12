@@ -60,14 +60,16 @@ const SectionTwo = () => {
 						{constants.searchHeading}
 				</Typography>
 			</Box>
-			<Box display='flex' backgroundColor='' borderRadius='3px' className='flex justify-center mb-5 p-2 w-full'>
+			<Box display='flex' className='flex justify-center mb-5 p-2 w-full'>
 				<InputBase
+			
 					sx = {
 						{
 							width: isNonMobile ? '550px' : '100%',
 							padding: '8px',
-							color: '#fff',
-							background: 'linear-gradient(to right, #757f9a, #d7dde8)'
+							color: '#000',
+							background: '#F9F5F6',
+						  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
 						}
 					}
 					placeholder='Search'
@@ -98,13 +100,13 @@ const SectionTwo = () => {
 					paginatedPokemonDetails.map((pokemon, index) => (
 						<Grid item xs={12} sm={6} md={3} key={index}>
 				
-							<Card sx={{ maxWidth: '100%' }}>
-								<Box Box className = 'flex justify-center items-center'
-								sx = {
-									{
-										 background: 'linear-gradient(to top, #e6e9f0 20%, #eef1f5 100%)'
-									}
-								} >
+							<Card  sx = {{maxWidth: '100%'}}
+							>
+								<Box className = 'flex justify-center items-center shadow-sm'
+								sx = {{
+									background: '#F1f1f1'
+									}} 
+								>
 									<Tooltip title={pokemon.name}>
 										<CardMedia
 											component="img"
@@ -116,11 +118,11 @@ const SectionTwo = () => {
 									</Tooltip>
 								</Box>
 								<Link to={`/pokemon/${pokemon?.name}`}>
-									<Box className='border-1 border-black bg-slate-50 pb-2' sx={{ 
+									<Box className='border-1 border-black bg-slate-50 pb-2 shadow' sx={{ 
 										background: 'linear-gradient(-225deg, #FFFEFF 0%, #ebedee 100%)',
 										}}>
 										<CardContent sx={{ padding: '16px 16px 0px 12px !important', height: '100%', marginBottom: '8px' }}>
-											<Typography className='capitalize tracking-wide cursor-pointer !important' sx={{ fontSize: '20px', color: '#DC143C', fontFamily: 'unset', fontWeight: '600' }}>
+											<Typography className='capitalize tracking-wide cursor-pointer !important' sx={{ fontSize: '20px', color: '#51829B', fontFamily: 'unset', fontWeight: '600' }}>
 												<Link to={`/pokemon/${pokemon?.name}`}>
 													{pokemon?.name}
 												</Link>
